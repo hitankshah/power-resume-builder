@@ -1,4 +1,3 @@
-
 import * as z from "zod";
 
 export const personalInfoSchema = z.object({
@@ -33,10 +32,47 @@ export const educationSchema = z.object({
   description: z.string().optional(),
 });
 
+export const languageSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Language name is required"),
+  proficiency: z.enum(["Basic", "Intermediate", "Advanced", "Native"]),
+});
+
 export const skillSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Skill name is required"),
   level: z.number().min(1).max(5).optional(),
+  category: z.enum([
+    "Technical",
+    "Soft Skills",
+    "Industry Knowledge",
+    "Tools",
+    "Certifications",
+    "Other"
+  ]).optional(),
+});
+
+export const professionalTemplateSchema = z.object({
+  role: z.enum([
+    "software-engineer",
+    "doctor",
+    "student",
+    "mba-student",
+    "business-analyst",
+    "project-manager",
+    "marketing-professional",
+    "designer",
+    "researcher",
+    "teacher",
+  ]).optional(),
+  style: z.enum([
+    "minimal",
+    "professional",
+    "modern",
+    "academic",
+    "creative",
+    "executive"
+  ]).default("minimal"),
 });
 
 export const resumeSchema = z.object({
@@ -44,7 +80,8 @@ export const resumeSchema = z.object({
   experiences: z.array(experienceSchema),
   education: z.array(educationSchema),
   skills: z.array(skillSchema),
-  template: z.string().default("minimal"),
+  languages: z.array(languageSchema).optional(),
+  template: professionalTemplateSchema,
 });
 
 export type ResumeData = z.infer<typeof resumeSchema>;
@@ -52,3 +89,5 @@ export type PersonalInfo = z.infer<typeof personalInfoSchema>;
 export type Experience = z.infer<typeof experienceSchema>;
 export type Education = z.infer<typeof educationSchema>;
 export type Skill = z.infer<typeof skillSchema>;
+export type Language = z.infer<typeof languageSchema>;
+export type ProfessionalTemplate = z.infer<typeof professionalTemplateSchema>;
