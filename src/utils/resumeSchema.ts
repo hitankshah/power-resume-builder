@@ -53,13 +53,40 @@ export const skillSchema = z.object({
   ]).optional(),
 });
 
+export const hobbySchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Hobby name is required"),
+  description: z.string().optional(),
+});
+
+export const achievementSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, "Achievement title is required"),
+  date: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export const certificateSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Certificate name is required"),
+  issuer: z.string().min(1, "Issuer is required"),
+  date: z.string().optional(),
+  credentialID: z.string().optional(),
+  credentialURL: z.string().url().optional().or(z.literal("")),
+  description: z.string().optional(),
+});
+
 const templateStyles = z.enum([
   "minimal",
   "professional",
   "modern",
   "academic",
   "creative",
-  "executive"
+  "executive",
+  "technical",
+  "elegant",
+  "bold",
+  "simple"
 ]);
 
 const templateRoles = z.enum([
@@ -73,6 +100,12 @@ const templateRoles = z.enum([
   "designer",
   "researcher",
   "teacher",
+  "data-scientist",
+  "finance-professional",
+  "healthcare-worker",
+  "sales-representative",
+  "customer-service",
+  "executive",
 ]);
 
 export const professionalTemplateSchema = z.object({
@@ -86,6 +119,9 @@ export const resumeSchema = z.object({
   education: z.array(educationSchema),
   skills: z.array(skillSchema),
   languages: z.array(languageSchema).optional(),
+  hobbies: z.array(hobbySchema).optional(),
+  achievements: z.array(achievementSchema).optional(),
+  certificates: z.array(certificateSchema).optional(),
   template: professionalTemplateSchema,
 });
 
@@ -95,6 +131,9 @@ export type Experience = z.infer<typeof experienceSchema>;
 export type Education = z.infer<typeof educationSchema>;
 export type Skill = z.infer<typeof skillSchema>;
 export type Language = z.infer<typeof languageSchema>;
+export type Hobby = z.infer<typeof hobbySchema>;
+export type Achievement = z.infer<typeof achievementSchema>;
+export type Certificate = z.infer<typeof certificateSchema>;
 export type ProfessionalTemplate = z.infer<typeof professionalTemplateSchema>;
 export type TemplateStyle = z.infer<typeof templateStyles>;
 export type TemplateRole = z.infer<typeof templateRoles>;

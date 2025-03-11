@@ -17,11 +17,15 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData }) => {
       case "minimal":
         return <MinimalTemplate resumeData={resumeData} />;
       case "modern":
+      case "creative":
+      case "bold":
         return <ModernTemplate resumeData={resumeData} />;
       case "professional":
       case "academic":
-      case "creative":
       case "executive":
+      case "technical":
+      case "elegant":
+      case "simple":
         return <ProfessionalTemplate resumeData={resumeData} />;
       default:
         return <MinimalTemplate resumeData={resumeData} />;
@@ -32,7 +36,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData }) => {
     <div className="w-full overflow-hidden">
       <Card 
         className={cn(
-          "w-full bg-white shadow-md transition-all duration-500 ease-apple",
+          "w-full bg-white dark:bg-gray-800 shadow-md transition-all duration-500 ease-apple",
           "hover:shadow-lg"
         )}
       >
