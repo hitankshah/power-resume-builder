@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TemplateSelector from "./TemplateSelector";
 import AISuggestions from "./AISuggestions";
 import { toast } from "sonner";
@@ -26,7 +26,6 @@ interface ResumeFormProps {
 const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange }) => {
   const [activeTab, setActiveTab] = useState("personal");
   
-  // Set up form with defaults
   const form = useForm<ResumeData>({
     resolver: zodResolver(resumeSchema),
     defaultValues: {
@@ -84,7 +83,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
     },
   });
   
-  // Set up field arrays for experiences, education, skills, and languages
   const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({
     control: form.control,
     name: "experiences",
@@ -105,7 +103,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
     name: "languages",
   });
   
-  // Handle form changes
   React.useEffect(() => {
     const subscription = form.watch((value) => {
       onChange?.(value as Partial<ResumeData>);
@@ -154,7 +151,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
             <CardContent>
               <TabsContent value="personal" className="animate-fade-in">
                 <div className="space-y-6">
-                  {/* Personal Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -257,7 +253,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
                   
                   <Separator />
                   
-                  {/* Professional Summary */}
                   <div className="space-y-4">
                     <FormField
                       control={form.control}
