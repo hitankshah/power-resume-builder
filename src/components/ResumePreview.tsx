@@ -1,0 +1,47 @@
+
+import React from "react";
+import { ResumeData } from "@/utils/resumeSchema";
+import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import MinimalTemplate from "./templates/MinimalTemplate";
+import ModernTemplate from "./templates/ModernTemplate";
+import ProfessionalTemplate from "./templates/ProfessionalTemplate";
+
+interface ResumePreviewProps {
+  resumeData: ResumeData;
+}
+
+const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData }) => {
+  const renderTemplate = () => {
+    switch (resumeData.template) {
+      case "minimal":
+        return <MinimalTemplate resumeData={resumeData} />;
+      case "modern":
+        return <ModernTemplate resumeData={resumeData} />;
+      case "professional":
+        return <ProfessionalTemplate resumeData={resumeData} />;
+      default:
+        return <MinimalTemplate resumeData={resumeData} />;
+    }
+  };
+
+  return (
+    <div className="w-full overflow-hidden">
+      <Card 
+        className={cn(
+          "w-full bg-white shadow-md transition-all duration-500 ease-apple",
+          "hover:shadow-lg"
+        )}
+      >
+        <div 
+          id="resume-preview-container" 
+          className="w-full aspect-[1/1.414] overflow-auto" // A4 aspect ratio
+        >
+          {renderTemplate()}
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+export default ResumePreview;
