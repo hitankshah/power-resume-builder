@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
-import { ResumeForm } from "@/components/ResumeForm";
-import { ResumePreview } from "@/components/ResumePreview";
+import ResumeForm from "@/components/ResumeForm";
+import ResumePreview from "@/components/ResumePreview";
 import { ResumeData, resumeSchema } from "@/utils/resumeSchema";
 import { exportToPdf } from "@/utils/pdfUtils";
 import { Button } from "@/components/ui/button";
