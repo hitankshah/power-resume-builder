@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ResumeData, resumeSchema, personalInfoSchema, experienceSchema, educationSchema, skillSchema } from "@/utils/resumeSchema";
+import { ResumeData, resumeSchema, ProfessionalTemplate } from "@/utils/resumeSchema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -70,11 +70,21 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
           level: 3,
         },
       ],
-      template: initialData?.template || "minimal",
+      languages: initialData?.languages || [
+        {
+          id: uuidv4(),
+          name: "",
+          proficiency: "Intermediate",
+        },
+      ],
+      template: initialData?.template || {
+        style: "minimal",
+        role: undefined,
+      },
     },
   });
   
-  // Set up field arrays for experiences, education, and skills
+  // Set up field arrays for experiences, education, skills, and languages
   const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({
     control: form.control,
     name: "experiences",
@@ -88,6 +98,11 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
   const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({
     control: form.control,
     name: "skills",
+  });
+  
+  const { fields: languageFields, append: appendLanguage, remove: removeLanguage } = useFieldArray({
+    control: form.control,
+    name: "languages",
   });
   
   // Handle form changes
@@ -115,16 +130,25 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
     }
   };
   
+  const handleTemplateStyleChange = (style: string) => {
+    form.setValue("template.style", style as any);
+  };
+  
+  const handleRoleChange = (role: string) => {
+    form.setValue("template.role", role as any);
+  };
+  
   return (
     <div className="w-full">
       <Form {...form}>
         <Card className="neomorphic">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full grid grid-cols-4 mb-4">
+            <TabsList className="w-full grid grid-cols-5 mb-4">
               <TabsTrigger value="personal" className="transition-all duration-300 ease-apple">Personal</TabsTrigger>
               <TabsTrigger value="experience" className="transition-all duration-300 ease-apple">Experience</TabsTrigger>
               <TabsTrigger value="education" className="transition-all duration-300 ease-apple">Education</TabsTrigger>
               <TabsTrigger value="skills" className="transition-all duration-300 ease-apple">Skills</TabsTrigger>
+              <TabsTrigger value="languages" className="transition-all duration-300 ease-apple">Languages</TabsTrigger>
             </TabsList>
             
             <CardContent>
@@ -608,11 +632,91 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
                     <PlusCircle className="h-4 w-4 mr-2" /> Add Skill
                   </Button>
                 </div>
+              </TabsContent>
+              
+              <TabsContent value="languages" className="animate-fade-in">
+                <div className="space-y-6">
+                  {languageFields.map((field, index) => (
+                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center animate-enter">
+                      <FormField
+                        control={form.control}
+                        name={`languages.${index}.name`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Language</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Language name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="flex items-end space-x-2">
+                        <FormField
+                          control={form.control}
+                          name={`languages.${index}.proficiency`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Proficiency</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select proficiency" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="Basic">Basic</SelectItem>
+                                  <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                  <SelectItem value="Advanced">Advanced</SelectItem>
+                                  <SelectItem value="Native">Native</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeLanguage(index)}
+                          className="h-10 w-10 text-destructive flex-shrink-0 mb-[2px]"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      appendLanguage({
+                        id: uuidv4(),
+                        name: "",
+                        proficiency: "Intermediate",
+                      })
+                    }
+                    className="w-full"
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" /> Add Language
+                  </Button>
+                </div>
+                
+                <Separator className="my-8" />
                 
                 <div className="mt-8">
                   <TemplateSelector
                     selectedTemplate={form.watch("template")}
-                    onSelectTemplate={(template) => form.setValue("template", template)}
+                    onSelectTemplate={handleTemplateStyleChange}
+                    selectedRole={form.watch("template.role")}
+                    onSelectRole={handleRoleChange}
                   />
                 </div>
               </TabsContent>
@@ -624,16 +728,13 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
               type="button"
               variant="outline"
               onClick={() => {
-                const newTab = {
-                  personal: "experience",
-                  experience: "education",
-                  education: "skills",
-                  skills: "personal",
-                }[activeTab];
-                setActiveTab(newTab as string);
+                const tabOrder = ["personal", "experience", "education", "skills", "languages"];
+                const currentIndex = tabOrder.indexOf(activeTab);
+                const nextIndex = (currentIndex + 1) % tabOrder.length;
+                setActiveTab(tabOrder[nextIndex]);
               }}
             >
-              {activeTab === "skills" ? "Back to Personal" : "Next"}
+              {activeTab === "languages" ? "Back to Personal" : "Next"}
             </Button>
             
             <Button type="button" onClick={handleSubmit} className="flex items-center gap-2">

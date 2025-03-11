@@ -4,6 +4,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ProfessionalTemplate, TemplateRole, TemplateStyle } from "@/utils/resumeSchema";
 
 export interface Template {
   id: string;
@@ -14,7 +15,7 @@ export interface Template {
 }
 
 interface TemplateSelectorProps {
-  selectedTemplate: string;
+  selectedTemplate: ProfessionalTemplate;
   onSelectTemplate: (templateId: string) => void;
   selectedRole?: string;
   onSelectRole?: (role: string) => void;
@@ -107,7 +108,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
       </div>
       
       <RadioGroup 
-        value={selectedTemplate} 
+        value={selectedTemplate.style} 
         onValueChange={onSelectTemplate}
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
       >

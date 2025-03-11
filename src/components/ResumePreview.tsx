@@ -13,12 +13,15 @@ interface ResumePreviewProps {
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData }) => {
   const renderTemplate = () => {
-    switch (resumeData.template) {
+    switch (resumeData.template.style) {
       case "minimal":
         return <MinimalTemplate resumeData={resumeData} />;
       case "modern":
         return <ModernTemplate resumeData={resumeData} />;
       case "professional":
+      case "academic":
+      case "creative":
+      case "executive":
         return <ProfessionalTemplate resumeData={resumeData} />;
       default:
         return <MinimalTemplate resumeData={resumeData} />;

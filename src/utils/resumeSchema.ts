@@ -1,3 +1,4 @@
+
 import * as z from "zod";
 
 export const personalInfoSchema = z.object({
@@ -52,27 +53,31 @@ export const skillSchema = z.object({
   ]).optional(),
 });
 
+const templateStyles = z.enum([
+  "minimal",
+  "professional",
+  "modern",
+  "academic",
+  "creative",
+  "executive"
+]);
+
+const templateRoles = z.enum([
+  "software-engineer",
+  "doctor",
+  "student",
+  "mba-student",
+  "business-analyst",
+  "project-manager",
+  "marketing-professional",
+  "designer",
+  "researcher",
+  "teacher",
+]);
+
 export const professionalTemplateSchema = z.object({
-  role: z.enum([
-    "software-engineer",
-    "doctor",
-    "student",
-    "mba-student",
-    "business-analyst",
-    "project-manager",
-    "marketing-professional",
-    "designer",
-    "researcher",
-    "teacher",
-  ]).optional(),
-  style: z.enum([
-    "minimal",
-    "professional",
-    "modern",
-    "academic",
-    "creative",
-    "executive"
-  ]).default("minimal"),
+  role: templateRoles.optional(),
+  style: templateStyles.default("minimal"),
 });
 
 export const resumeSchema = z.object({
@@ -91,3 +96,5 @@ export type Education = z.infer<typeof educationSchema>;
 export type Skill = z.infer<typeof skillSchema>;
 export type Language = z.infer<typeof languageSchema>;
 export type ProfessionalTemplate = z.infer<typeof professionalTemplateSchema>;
+export type TemplateStyle = z.infer<typeof templateStyles>;
+export type TemplateRole = z.infer<typeof templateRoles>;
