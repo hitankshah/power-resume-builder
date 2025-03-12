@@ -1,68 +1,70 @@
-
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
 
-export const exportToPdf = async (elementId: string, fileName: string = "resume.pdf"): Promise<void> => {
+export const exportToPdf = async (elementId: string, fileName: string = "resume.pdf", pageSize: string, font: string, fontSize: string): Promise<boolean> => {
+  const loadingToast = toast.loading("Preparing your PDF...");
+
   try {
-    toast.loading("Preparing your PDF...");
-    
     const element = document.getElementById(elementId);
     if (!element) {
-      throw new Error("Element not found");
+      throw new Error("Resume container not found");
     }
 
-    // Hide any elements with the class "no-print"
-    const noPrintElements = element.querySelectorAll(".no-print");
-    noPrintElements.forEach(el => {
-      (el as HTMLElement).style.display = "none";
-    });
+    // Set scale based on device pixel ratio
+    const scale = window.devicePixelRatio || 2;
 
-    // Create canvas from the element
     const canvas = await html2canvas(element, {
-      scale: 2, // Higher scale for better quality
+      scale: scale,
       useCORS: true,
       logging: false,
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
+      allowTaint: true,
+      foreignObjectRendering: true,
     });
 
-    // Show the hidden elements again
-    noPrintElements.forEach(el => {
-      (el as HTMLElement).style.display = "";
+    // Page size measurements in mm
+    const pageSizes = {
+      A4: { width: 210, height: 297 },
+      Letter: { width: 216, height: 279 },
+      Legal: { width: 216, height: 356 },
+    };
+
+    const { width: imgWidth, height: imgHeight } = pageSizes[pageSize];
+    const pdfHeight = (canvas.height * imgWidth) / canvas.width;
+
+    const pdf = new jsPDF({
+      orientation: pdfHeight > imgWidth ? 'portrait' : 'landscape',
+      unit: 'mm',
+      format: [imgWidth, imgHeight],
     });
 
-    // Get the width and height of the resume in the PDF
-    const imgWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
-    // Create PDF of A4 size
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    
-    // Handle multi-page resumes
-    let position = 0;
-    let heightLeft = imgHeight;
+    // Add the image to PDF
+    pdf.addImage(
+      canvas.toDataURL('image/jpeg', 1.0),
+      'JPEG',
+      0,
+      0,
+      imgWidth,
+      pdfHeight,
+      undefined,
+      'FAST'
+    );
 
-    // Add image to the first page
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    // Set font and font size
+    pdf.setFont(font);
+    pdf.setFontSize(parseInt(fontSize));
 
-    // Add subsequent pages if needed
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-    
     // Save the PDF
     pdf.save(fileName);
     
-    toast.dismiss();
-    toast.success("PDF successfully downloaded!");
+    toast.dismiss(loadingToast);
+    toast.success("PDF downloaded successfully!");
+    return true;
   } catch (error) {
-    console.error("Error exporting PDF:", error);
-    toast.dismiss();
-    toast.error("Failed to export PDF. Please try again.");
+    console.error("PDF export error:", error);
+    toast.dismiss(loadingToast);
+    toast.error("Failed to generate PDF. Please try again.");
+    return false;
   }
 };

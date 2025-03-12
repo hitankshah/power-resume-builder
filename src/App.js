@@ -13,6 +13,7 @@ import LandingPage from './pages/LandingPage';
 import ProfilePage from './pages/ProfilePage';
 import { supabase } from '@/supabaseClient';
 import { useAuthStore } from '@/stores/authStore';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const queryClient = new QueryClient();
 
@@ -37,14 +38,16 @@ function App() {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/ats-checker" element={<AtsChecker />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/resume-builder" element={user ? <Index /> : <Navigate to="/auth" />} />
-              <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/auth" />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/ats-checker" element={<AtsChecker />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/resume-builder" element={user ? <Index /> : <Navigate to="/auth" />} />
+                <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/auth" />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ErrorBoundary>
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>

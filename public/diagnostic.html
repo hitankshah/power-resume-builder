@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Resume Builder Diagnostic</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .success { color: green; }
+    .error { color: red; }
+    .section { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Power Resume Builder Diagnostic</h1>
+  
+  <div class="section">
+    <h2>Browser Information</h2>
+    <div id="browser-info"></div>
+  </div>
+  
+  <div class="section">
+    <h2>JavaScript Check</h2>
+    <div id="js-check"></div>
+  </div>
+  
+  <div class="section">
+    <h2>Local Storage Check</h2>
+    <div id="ls-check"></div>
+  </div>
+  
+  <div class="section">
+    <h2>Network Check</h2>
+    <div id="network-check"></div>
+  </div>
+  
+  <div class="section">
+    <h2>Return to App</h2>
+    <button onclick="window.location.href='/'">Return to Application</button>
+  </div>
+
+  <script>
+    // Browser information
+    document.getElementById('browser-info').innerHTML = `
+      <p>User Agent: ${navigator.userAgent}</p>
+      <p>Browser: ${navigator.appName}</p>
+      <p>Version: ${navigator.appVersion}</p>
+    `;
+
+    // JavaScript check
+    document.getElementById('js-check').innerHTML = `
+      <p class="success">JavaScript is working correctly.</p>
+    `;
+
+    // Local Storage check
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      document.getElementById('ls-check').innerHTML = `
+        <p class="success">Local Storage is working correctly.</p>
+      `;
+    } catch (e) {
+      document.getElementById('ls-check').innerHTML = `
+        <p class="error">Local Storage is not available: ${e.message}</p>
+      `;
+    }
+
+    // Network check
+    const networkCheck = document.getElementById('network-check');
+    networkCheck.innerHTML = '<p>Checking network status...</p>';
+    
+    fetch('/')
+      .then(response => {
+        if (response.ok) {
+          networkCheck.innerHTML = `
+            <p class="success">Network connection successful.</p>
+          `;
+        } else {
+          networkCheck.innerHTML = `
+            <p class="error">Network connection failed with status: ${response.status}</p>
+          `;
+        }
+      })
+      .catch(error => {
+        networkCheck.innerHTML = `
+          <p class="error">Network error: ${error.message}</p>
+        `;
+      });
+  </script>
+</body>
+</html>

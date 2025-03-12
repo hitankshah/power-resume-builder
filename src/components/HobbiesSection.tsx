@@ -1,6 +1,5 @@
-
 import React from "react";
-import { useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
-const HobbiesSection = ({ form }: any) => {
+const HobbiesSection = () => {
+  const { control } = useFormContext();
+  
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control,
     name: "hobbies",
   });
 
@@ -33,7 +34,7 @@ const HobbiesSection = ({ form }: any) => {
 
             <div className="space-y-4">
               <FormField
-                control={form.control}
+                control={control}
                 name={`hobbies.${index}.name`}
                 render={({ field }) => (
                   <FormItem>
@@ -47,7 +48,7 @@ const HobbiesSection = ({ form }: any) => {
               />
 
               <FormField
-                control={form.control}
+                control={control}
                 name={`hobbies.${index}.description`}
                 render={({ field }) => (
                   <FormItem>

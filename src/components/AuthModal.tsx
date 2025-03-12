@@ -1,61 +1,87 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, GitHub, ArrowRight } from "lucide-react";
+import { Mail, Github, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "../supabaseClient";
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (user: { name: string; email: string }) => void;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // This is a simulated authentication process
-      // In a real app, this would call an authentication service
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (activeTab === "login") {
+        const { data: { user }, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        if (!user) throw new Error('No user returned from auth');
+        
+        setUser(user);
+        navigate('/resume-builder');
+      } else {
+        const { data: { user }, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name,
+            },
+          },
+        });
+        
+        if (error) throw error;
+        if (!user) throw new Error('No user returned from auth');
+        
+        toast.success("Please check your email to verify your account");
+        navigate('/resume-builder');
+      }
       
-      // Simulate successful login/signup
-      toast.success(`${activeTab === "login" ? "Logged in" : "Signed up"} successfully!`);
-      onSuccess({ name: name || email.split('@')[0], email });
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Auth error:", error);
-      toast.error("Authentication failed. Please try again.");
+      toast.error(error.message || "Authentication failed");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGithubAuth = async () => {
-    setIsLoading(true);
-    
     try {
-      // Simulate GitHub auth
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.success("GitHub authentication successful!");
-      onSuccess({ name: "GitHub User", email: "github@example.com" });
-      onClose();
-    } catch (error) {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      
+      if (error) throw error;
+      
+      // GitHub auth success handling will be done through onAuthStateChange
+    } catch (error: any) {
       console.error("GitHub auth error:", error);
-      toast.error("GitHub authentication failed. Please try again.");
-    } finally {
-      setIsLoading(false);
+      toast.error(error.message || "GitHub authentication failed");
     }
   };
 
@@ -130,7 +156,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                 Gmail
               </Button>
               <Button variant="outline" type="button" onClick={handleGithubAuth} disabled={isLoading}>
-                <GitHub className="mr-2 h-4 w-4" />
+                <Github className="mr-2 h-4 w-4" />
                 GitHub
               </Button>
             </div>
@@ -194,7 +220,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                 Gmail
               </Button>
               <Button variant="outline" type="button" onClick={handleGithubAuth} disabled={isLoading}>
-                <GitHub className="mr-2 h-4 w-4" />
+                <Github className="mr-2 h-4 w-4" />
                 GitHub
               </Button>
             </div>

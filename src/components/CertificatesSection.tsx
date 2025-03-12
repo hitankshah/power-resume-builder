@@ -1,6 +1,5 @@
-
 import React from "react";
-import { useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
-const CertificatesSection = ({ form }: any) => {
+const CertificatesSection = () => {
+  const { control } = useFormContext();
+  
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control,
     name: "certificates",
   });
 
@@ -34,7 +35,7 @@ const CertificatesSection = ({ form }: any) => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
+                  control={control}
                   name={`certificates.${index}.name`}
                   render={({ field }) => (
                     <FormItem>
@@ -48,7 +49,7 @@ const CertificatesSection = ({ form }: any) => {
                 />
 
                 <FormField
-                  control={form.control}
+                  control={control}
                   name={`certificates.${index}.issuer`}
                   render={({ field }) => (
                     <FormItem>
@@ -62,7 +63,7 @@ const CertificatesSection = ({ form }: any) => {
                 />
 
                 <FormField
-                  control={form.control}
+                  control={control}
                   name={`certificates.${index}.date`}
                   render={({ field }) => (
                     <FormItem>
@@ -76,7 +77,7 @@ const CertificatesSection = ({ form }: any) => {
                 />
 
                 <FormField
-                  control={form.control}
+                  control={control}
                   name={`certificates.${index}.credentialID`}
                   render={({ field }) => (
                     <FormItem>
@@ -91,7 +92,7 @@ const CertificatesSection = ({ form }: any) => {
               </div>
 
               <FormField
-                control={form.control}
+                control={control}
                 name={`certificates.${index}.credentialURL`}
                 render={({ field }) => (
                   <FormItem>
@@ -105,7 +106,7 @@ const CertificatesSection = ({ form }: any) => {
               />
 
               <FormField
-                control={form.control}
+                control={control}
                 name={`certificates.${index}.description`}
                 render={({ field }) => (
                   <FormItem>

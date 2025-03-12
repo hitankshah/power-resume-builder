@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ResumeData } from "@/utils/resumeSchema";
 import { cn } from "@/lib/utils";
@@ -9,9 +8,11 @@ import ProfessionalTemplate from "./templates/ProfessionalTemplate";
 
 interface ResumePreviewProps {
   resumeData: ResumeData;
+  selectedFont: string;
+  fontSize: string;
 }
 
-const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData }) => {
+const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, selectedFont, fontSize }) => {
   const renderTemplate = () => {
     switch (resumeData.template.style) {
       case "minimal":
@@ -43,6 +44,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData }) => {
         <div 
           id="resume-preview-container" 
           className="w-full aspect-[1/1.414] overflow-auto" // A4 aspect ratio
+          style={{ fontFamily: selectedFont, fontSize: `${fontSize}px` }}
         >
           {renderTemplate()}
         </div>
