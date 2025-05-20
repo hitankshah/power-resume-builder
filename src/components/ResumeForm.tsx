@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ResumeData, resumeSchema, ProfessionalTemplate } from "@/utils/resumeSchema";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import TemplateSelector from "./TemplateSelector";
 import AISuggestions from "./AISuggestions";
 import { toast } from "sonner";
-import { PlusCircle, Trash2, Save } from "lucide-react";
+import { PlusCircle, Trash2, Save, Eye } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 interface ResumeFormProps {
@@ -25,7 +26,8 @@ interface ResumeFormProps {
 
 const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange }) => {
   const [activeTab, setActiveTab] = useState("personal");
-  
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+
   const form = useForm<ResumeData>({
     resolver: zodResolver(resumeSchema),
     defaultValues: {
@@ -76,45 +78,51 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
           proficiency: "Intermediate",
         },
       ],
+      customSections: initialData?.customSections || [],
       template: initialData?.template || {
         style: "minimal",
-        role: undefined,
+        role: "software-engineer",
       },
     },
   });
-  
+
   const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({
     control: form.control,
     name: "experiences",
   });
-  
+
   const { fields: educationFields, append: appendEducation, remove: removeEducation } = useFieldArray({
     control: form.control,
     name: "education",
   });
-  
+
   const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({
     control: form.control,
     name: "skills",
   });
-  
+
   const { fields: languageFields, append: appendLanguage, remove: removeLanguage } = useFieldArray({
     control: form.control,
     name: "languages",
   });
-  
+
+  const { fields: customSectionFields, append: appendCustomSection, remove: removeCustomSection } = useFieldArray({
+    control: form.control,
+    name: "customSections",
+  });
+
   React.useEffect(() => {
     const subscription = form.watch((value) => {
       onChange?.(value as Partial<ResumeData>);
     });
     return () => subscription.unsubscribe();
   }, [form, onChange]);
-  
+
   const handleSubmit = form.handleSubmit((data) => {
     onSubmit(data);
     toast.success("Resume has been saved!");
   });
-  
+
   const handleAISuggestion = (field: string, value: string) => {
     if (field === "summary") {
       form.setValue("personalInfo.summary", value);
@@ -126,28 +134,39 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
       form.setValue(`education.${index}.description`, value);
     }
   };
-  
+
   const handleTemplateStyleChange = (style: string) => {
     form.setValue("template.style", style as any);
   };
-  
+
   const handleRoleChange = (role: string) => {
     form.setValue("template.role", role as any);
   };
-  
+
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const items = Array.from(customSectionFields);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    form.setValue("customSections", items);
+  };
+
   return (
     <div className="w-full">
       <Form {...form}>
         <Card className="neomorphic">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full grid grid-cols-5 mb-4">
+            <TabsList className="w-full grid grid-cols-6 mb-4">
               <TabsTrigger value="personal" className="transition-all duration-300 ease-apple">Personal</TabsTrigger>
               <TabsTrigger value="experience" className="transition-all duration-300 ease-apple">Experience</TabsTrigger>
               <TabsTrigger value="education" className="transition-all duration-300 ease-apple">Education</TabsTrigger>
               <TabsTrigger value="skills" className="transition-all duration-300 ease-apple">Skills</TabsTrigger>
               <TabsTrigger value="languages" className="transition-all duration-300 ease-apple">Languages</TabsTrigger>
+              <TabsTrigger value="custom" className="transition-all duration-300 ease-apple">Custom</TabsTrigger>
             </TabsList>
-            
+
             <CardContent>
               <TabsContent value="personal" className="animate-fade-in">
                 <div className="space-y-6">
@@ -715,26 +734,114 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ initialData, onSubmit, onChange
                   />
                 </div>
               </TabsContent>
+
+              <TabsContent value="custom" className="animate-fade-in">
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="customSections">
+                    {(provided) => (
+                      <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-6">
+                        {customSectionFields.map((field, index) => (
+                          <Draggable key={field.id} draggableId={field.id} index={index}>
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="space-y-4 p-4 border rounded-lg relative animate-enter"
+                              >
+                                <div className="absolute top-4 right-4">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeCustomSection(index)}
+                                    className="h-8 w-8 text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+
+                                <FormField
+                                  control={form.control}
+                                  name={`customSections.${index}.title`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Section Title</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Section Title" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name={`customSections.${index}.content`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Content</FormLabel>
+                                      <FormControl>
+                                        <Textarea
+                                          placeholder="Section Content"
+                                          rows={4}
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    appendCustomSection({
+                      id: uuidv4(),
+                      title: "",
+                      content: "",
+                    })
+                  }
+                  className="w-full"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" /> Add Custom Section
+                </Button>
+              </TabsContent>
             </CardContent>
           </Tabs>
-          
+
           <div className="flex justify-between p-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => {
-                const tabOrder = ["personal", "experience", "education", "skills", "languages"];
+                const tabOrder = ["personal", "experience", "education", "skills", "languages", "custom"];
                 const currentIndex = tabOrder.indexOf(activeTab);
                 const nextIndex = (currentIndex + 1) % tabOrder.length;
                 setActiveTab(tabOrder[nextIndex]);
               }}
             >
-              {activeTab === "languages" ? "Back to Personal" : "Next"}
+              {activeTab === "custom" ? "Back to Personal" : "Next"}
             </Button>
-            
-            <Button type="button" onClick={handleSubmit} className="flex items-center gap-2">
-              <Save className="h-4 w-4" /> Save Resume
-            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsPreviewMode(!isPreviewMode)}>
+                <Eye className="h-4 w-4" /> {isPreviewMode ? "Edit Mode" : "Preview Mode"}
+              </Button>
+              <Button type="button" onClick={handleSubmit} className="flex items-center gap-2">
+                <Save className="h-4 w-4" /> Save Resume
+              </Button>
+            </div>
           </div>
         </Card>
       </Form>

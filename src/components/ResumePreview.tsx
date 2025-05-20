@@ -13,8 +13,15 @@ interface ResumePreviewProps {
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, selectedFont, fontSize }) => {
+  if (!resumeData) {
+    return <div className="flex items-center justify-center h-full">No resume data available</div>;
+  }
+
   const renderTemplate = () => {
-    switch (resumeData.template.style) {
+    // Default to minimal if template or style is not defined
+    const templateStyle = resumeData?.template?.style || "minimal";
+    
+    switch (templateStyle) {
       case "minimal":
         return <MinimalTemplate resumeData={resumeData} />;
       case "modern":

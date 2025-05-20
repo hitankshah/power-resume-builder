@@ -1,4 +1,3 @@
-
 import * as z from "zod";
 
 export const personalInfoSchema = z.object({
@@ -76,6 +75,12 @@ export const certificateSchema = z.object({
   description: z.string().optional(),
 });
 
+export const customSectionSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, "Section title is required"),
+  content: z.string().optional(),
+});
+
 const templateStyles = z.enum([
   "minimal",
   "professional",
@@ -122,9 +127,11 @@ export const resumeSchema = z.object({
   hobbies: z.array(hobbySchema).optional(),
   achievements: z.array(achievementSchema).optional(),
   certificates: z.array(certificateSchema).optional(),
+  customSections: z.array(customSectionSchema).optional(),
   template: professionalTemplateSchema,
 });
 
+export type CustomSection = z.infer<typeof customSectionSchema>;
 export type ResumeData = z.infer<typeof resumeSchema>;
 export type PersonalInfo = z.infer<typeof personalInfoSchema>;
 export type Experience = z.infer<typeof experienceSchema>;
