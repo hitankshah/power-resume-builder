@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -17,11 +18,21 @@ const Profile = () => {
   };
 
   const handleExportPDF = async () => {
-    await exportToPdf("resume-preview-container", "resume.pdf");
+    await exportToPdf({
+      elementId: "resume-preview-container", 
+      fileName: "resume.pdf",
+      pageSize: "A4",
+      margin: 10,
+      scale: 1
+    });
   };
 
   const handleExportDOCX = async () => {
-    await exportToDocx("resume-preview-container", "resume.docx");
+    await exportToDocx({
+      elementId: "resume-preview-container", 
+      fileName: "resume.docx",
+      options: {}
+    });
   };
 
   return (
