@@ -13,9 +13,10 @@ import { useAuthStore } from '@/stores/authStore';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: (userData: { name: string; email: string }) => void;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
